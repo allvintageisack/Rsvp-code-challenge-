@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        h1 { color: #333; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
+        th { background-color: #f2f2f2; }
+        .status-pending { color: orange; }
+        .status-confirmed { color: green; font-weight: bold; }
+        .status-declined { color: red; }
+        .status-waitlisted { color: blue; }
+    </style>
+</head>
+<body>
+    <h1>Event Admin Dashboard</h1>
+    <h2>Guest List & RSVP Status</h2>
+
+    <p>
+        <button onclick="importGuests()">Import Guests from CSV</button>
+        <button onclick="sendInvitations()">Send Pending Invitations</button>
+        <br><br>
+        <small>(These actions will reload the page to show updated status)</small>
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Email</th>
+                <th>RSVP Status</th>
+                <th>Email Sent</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for guest in guests %}
+            <tr>
+                <td>{{ guest.full_name }}</td>
+                <td>{{ guest.email }}</td>
+                <td class="status-{{ guest.rsvp_status }}">{{ guest.rsvp_status.capitalize() }}</td>
+                <td>{% if guest.email_sent %}Yes{% else %}No{% endif %}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+
+    <script>
+        function importGuests() {
+            fetch('/admin/import_guests', { method: 'POST' })
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    location.reload(); // Reload to see changes
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error importing guests.');
+                });
+        }
+
+        function sendInvitations() {
+            fetch('/admin/send_invitations') // GET for simplicity, POST in production
+                .then(response => response.json())
+                .then(data => {
+                    alert(data.message);
+                    location.reload(); // Reload to see changes
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('Error sending invitations.');
+                });
+        }
+    </script>
+</body>
+</html>
